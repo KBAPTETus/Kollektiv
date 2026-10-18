@@ -22,7 +22,7 @@ const STATE = {
 // 1. Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js?v=4.2')
+    navigator.serviceWorker.register('/sw.js?v=6.0')
       .then(reg => {
         reg.update();
       })
@@ -169,6 +169,17 @@ async function compressImageOnClient(file, maxWidth = 800, quality = 0.75) {
 
 // 5. Инициализация и загрузка данных
 async function loadInitialData() {
+  // Полное обнуление локального хранилища клиента (чистый старт)
+  if (localStorage.getItem('kollektiv_clean_v6') !== 'true') {
+    localStorage.removeItem('kollektiv_cached_listings');
+    localStorage.removeItem('kollektiv_auth_token');
+    localStorage.removeItem('kollektiv_last_sync');
+    localStorage.setItem('kollektiv_clean_v6', 'true');
+    STATE.token = null;
+    STATE.user = null;
+    STATE.listings = [];
+  }
+
   const cached = localStorage.getItem('kollektiv_cached_listings');
   if (cached) {
     try {
@@ -256,9 +267,14 @@ function renderListings() {
   if (filtered.length === 0) {
     container.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: #fff; border-radius: 14px; border: 1px dashed var(--border);">
-        <p style="font-size: 2rem; margin-bottom: 8px;">🌾</p>
-        <p class="font-slab" style="font-size: 1.15rem; font-weight: 700;">В этой категории пока пусто</p>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Разместите первое объявление для соседей!</p>
+        <p style="font-size: 2.2rem; margin-bottom: 8px;">🌾</p>
+        <p class="font-slab" style="font-size: 1.2rem; font-weight: 700; margin-bottom: 6px;">Пока нет опубликованных объявлений</p>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px; max-width: 440px; margin-left: auto; margin-right: auto; line-height: 1.4;">
+          Каталог готов к работе. Будьте первым! Разместите продукты своего хозяйства или предложите дачные услуги соседям по СНТ.
+        </p>
+        <button onclick="document.getElementById('openPostBtn').click()" class="btn-contact phone" style="display: inline-flex; border-radius: var(--radius-sm); padding: 10px 24px;">
+          + Опубликовать первое объявление
+        </button>
       </div>
     `;
     return;
@@ -740,18 +756,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   } catch (e) {
     alert('Сетевая ошибка при входе');
   }
-});
-
-// Демо-кнопки быстрого входа
-document.querySelectorAll('.btn-demo-login').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const token = btn.getAttribute('data-token');
-    STATE.token = token;
-    localStorage.setItem('kollektiv_auth_token', token);
-    await fetchUserProfile();
-    renderUserModal();
-    syncListingsWithServer();
-  });
 });
 
 // Сохранение статуса профиля

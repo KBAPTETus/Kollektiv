@@ -1,9 +1,9 @@
-const CACHE_NAME = 'kollektiv-v5-features';
+const CACHE_NAME = 'kollektiv-v6-clean-zero';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/styles.css?v=4.2',
-  '/app.js?v=4.2',
+  '/styles.css?v=6.0',
+  '/app.js?v=6.0',
   '/manifest.json',
   '/fonts/arturito-slab.ttf'
 ];

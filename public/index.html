@@ -7,13 +7,13 @@
   <meta name="description" content="Свежие фермерские продукты и дачные услуги прямо у вас в поселке.">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#dc2626">
-  <link rel="stylesheet" href="/styles.css?v=4.2">
+  <link rel="stylesheet" href="/styles.css?v=6.0">
   <script>
     // Зачистка устаревших кэшей Service Worker
     if ('caches' in window) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name !== 'kollektiv-v5-features') {
+          if (name !== 'kollektiv-v6-clean-zero') {
             console.log('[Kollektiv] Очистка устаревшего кэша:', name);
             caches.delete(name);
           }
@@ -377,21 +377,6 @@
               Войти без пароля
             </button>
           </form>
-
-          <div style="margin-top: 20px; padding-top: 16px; border-top: 1px dashed var(--border);">
-            <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px;">Быстрый вход для тестирования статусов:</div>
-            <div style="display: flex; flex-direction: column; gap: 6px;">
-              <button class="btn-demo-login" data-token="kol_demo_basic">
-                🟡 <strong>Бабушка Анна</strong> (Обычный дачник, лимит 2 объявления)
-              </button>
-              <button class="btn-demo-login" data-token="kol_demo_pro">
-                🟢 <strong>Михаил ЗИЛ</strong> (Самозанятый мастер, 10 объявлений, буст)
-              </button>
-              <button class="btn-demo-login" data-token="kol_demo_verified">
-                🔵 <strong>Ферма «Заречье»</strong> (Проверенное ЛПХ, безлимит)
-              </button>
-            </div>
-          </div>
         </div>
 
         <!-- Вкладка АВТОРИЗОВАН -->
@@ -472,6 +457,6 @@
     </div>
   </div>
 
-  <script src="/app.js?v=4.2"></script>
+  <script src="/app.js?v=6.0"></script>
 </body>
 </html>

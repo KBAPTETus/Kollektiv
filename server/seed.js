@@ -29,222 +29,27 @@ const categories = [
   { id: 'cargo', name: 'Грузоперевозки / Газель', icon: '📦', type: 'services' }
 ];
 
-const sampleListings = [
-  {
-    title: 'Свежие деревенские яйца (куры на зерновом откорме)',
-    description: 'Всегда свежий сбор, желток ярко-оранжевый. Забирать на Центральной улице возле магазина или принесу к калитке.',
-    type: 'goods',
-    category_id: 'eggs',
-    location_name: 'СНТ «Восход»',
-    address_detail: 'ул. Центральная, уч. 48',
-    price: 160,
-    price_unit: 'руб/десяток',
-    contact_name: 'Бабушка Анна',
-    contact_phone: '+7 903 955-12-34',
-    contact_telegram: '',
-    image_url: 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=600&q=80',
-    is_boosted: 1,
-    boosted_until: '2026-10-25T23:59:59Z',
-    created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
-    updated_at: new Date(Date.now() - 3600000 * 5).toISOString()
-  },
-  {
-    title: 'Парное козье молоко без запаха',
-    description: 'Порода зааненская, чистейшее молоко, идеально для деток и сыроварения. Утренний и вечерний удой. Банки на обмен.',
-    type: 'goods',
-    category_id: 'dairy',
-    location_name: 'СНТ «Восход»',
-    address_detail: 'ул. Лесная, уч. 112',
-    price: 180,
-    price_unit: 'руб/литр',
-    contact_name: 'Валентина Григорьевна',
-    contact_phone: '+7 952 888-45-67',
-    contact_telegram: 't.me/valya_kozy',
-    image_url: 'https://images.unsplash.com/photo-1527153857715-3908f2bae5e8?auto=format&fit=crop&w=600&q=80',
-    is_boosted: 0,
-    boosted_until: null,
-    created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
-    updated_at: new Date(Date.now() - 3600000 * 12).toISOString()
-  },
-  {
-    title: 'Откачка септиков и выгребных ям (шланг 35 метров)',
-    description: 'Бочка 4 куба. Длинный рукав — подъедем к любому участку, забор не помнем. Быстро, аккуратно, договор на слив с Водоканалом.',
-    type: 'services',
-    category_id: 'septic',
-    location_name: 'СНТ «Восход»',
-    address_detail: 'Выезд по всем СНТ Богашевского тракта',
-    price: 1800,
-    price_unit: 'руб/рейс',
-    contact_name: 'Михаил (ЗИЛ)',
-    contact_phone: '+7 913 820-99-88',
-    contact_telegram: 't.me/mikhail_septik',
-    image_url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80',
-    is_boosted: 1,
-    boosted_until: '2026-10-30T23:59:59Z',
-    created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
-    updated_at: new Date(Date.now() - 3600000 * 2).toISOString()
-  },
-  {
-    title: 'Вспашка огородов мотоблоком и трактором МТЗ',
-    description: 'Фрезерование целины, перепашка под зиму, культивация. Ровный слой, разбиваем комья. Опыт 10 лет.',
-    type: 'services',
-    category_id: 'tractor',
-    location_name: 'СНТ «Энергетик»',
-    address_detail: 'Работаем по Кисловке, Зональному, СНТ Восход/Энергетик',
-    price: 700,
-    price_unit: 'руб/сотка',
-    contact_name: 'Сергей Николаевич',
-    contact_phone: '+7 906 199-33-22',
-    contact_telegram: '',
-    image_url: 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=600&q=80',
-    is_boosted: 0,
-    boosted_until: null,
-    created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
-    updated_at: new Date(Date.now() - 3600000 * 24).toISOString()
-  },
-  {
-    title: 'Березовые колотые сухие дрова в сетках и укладкой',
-    description: 'Жаркие, без гнили и трухи. Доставка на самосвале ГАЗ-53 от 2 кубов. Выгрузка включена в стоимость.',
-    type: 'services',
-    category_id: 'firewood',
-    location_name: 'пос. Зональная Станция',
-    address_detail: 'Быстрая доставка по пригороду',
-    price: 2500,
-    price_unit: 'руб/куб',
-    contact_name: 'Иван Петрович',
-    contact_phone: '+7 923 444-55-11',
-    contact_telegram: 't.me/drova_tomsk',
-    image_url: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80',
-    is_boosted: 0,
-    boosted_until: null,
-    created_at: new Date(Date.now() - 3600000 * 30).toISOString(),
-    updated_at: new Date(Date.now() - 3600000 * 30).toISOString()
-  },
-  {
-    title: 'Рассада сортовой клубники «Азия» и тепличных томатов',
-    description: 'Крепкая корневая система, закаленная рассада в стаканчиках. Сорта урожайные, адаптированы к сибирскому климату.',
-    type: 'goods',
-    category_id: 'plants',
-    location_name: 'СНТ «Восход»',
-    address_detail: 'ул. Садовая, уч. 74',
-    price: 45,
-    price_unit: 'руб/куст',
-    contact_name: 'Надежда Семеновна',
-    contact_phone: '+7 905 777-22-11',
-    contact_telegram: '',
-    image_url: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=600&q=80',
-    is_boosted: 0,
-    boosted_until: null,
-    created_at: new Date(Date.now() - 3600000 * 18).toISOString(),
-    updated_at: new Date(Date.now() - 3600000 * 18).toISOString()
-  },
-  {
-    title: 'Натуральный таежный мёд со своей пасеки (разнотравье)',
-    description: 'Качка текущего сезона, без сахара и химии. Густой, ароматный, с нотками донника и кипрея. Фасовка в стеклянные банки.',
-    type: 'goods',
-    category_id: 'honey',
-    location_name: 'СНТ «Кедр»',
-    address_detail: 'ул. Цветочная, уч. 12',
-    price: 700,
-    price_unit: 'руб/литр',
-    contact_name: 'Дядя Саша (Пасечник)',
-    contact_phone: '+7 952 111-22-33',
-    contact_telegram: 't.me/paseka_tomsk',
-    image_url: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=600&q=80',
-    is_boosted: 1,
-    boosted_until: '2026-10-28T23:59:59Z',
-    created_at: new Date(Date.now() - 3600000 * 8).toISOString(),
-    updated_at: new Date(Date.now() - 3600000 * 8).toISOString()
-  },
-  {
-    title: 'Покос травы, бурьяна и мелкого кустарника бензокосой',
-    description: 'Уборка участков под ключ, подготовка к продаже, обкос заборов и канав. Мощный профессиональный триммер Stihl.',
-    type: 'services',
-    category_id: 'mowing',
-    location_name: 'СНТ «Энергетик»',
-    address_detail: 'Выезд по всем СНТ Богашево и Лучаново',
-    price: 350,
-    price_unit: 'руб/сотка',
-    contact_name: 'Алексей (Покос)',
-    contact_phone: '+7 913 888-00-55',
-    contact_telegram: '',
-    image_url: 'https://images.unsplash.com/photo-1592417817098-8f3d6910985b?auto=format&fit=crop&w=600&q=80',
-    is_boosted: 0,
-    boosted_until: null,
-    created_at: new Date(Date.now() - 3600000 * 15).toISOString(),
-    updated_at: new Date(Date.now() - 3600000 * 15).toISOString()
-  },
-  {
-    title: 'Грузоперевозки на Газели (тент 4.2 м, грузоподъемность 1.5 т)',
-    description: 'Перевозка стройматериалов, досок, мебели, саженцев, навоза в мешках. Помощь с погрузкой. Чистый кузов.',
-    type: 'services',
-    category_id: 'cargo',
-    location_name: 'дер. Кисловка',
-    address_detail: 'Работаем по пригороду и СНТ',
-    price: 900,
-    price_unit: 'руб/час',
-    contact_name: 'Дмитрий (Газель)',
-    contact_phone: '+7 903 911-34-56',
-    contact_telegram: 't.me/dmitry_cargo',
-    image_url: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=600&q=80',
-    is_boosted: 0,
-    boosted_until: null,
-    created_at: new Date(Date.now() - 3600000 * 20).toISOString(),
-    updated_at: new Date(Date.now() - 3600000 * 20).toISOString()
-  }
-];
-
-// Seed Locations
+// 1. Справочник локаций (СНТ и поселки)
 const insertLocation = db.prepare('INSERT OR IGNORE INTO locations (name, type, lat, lon) VALUES (?, ?, ?, ?)');
 for (const loc of locations) {
   insertLocation.run(loc.name, loc.type, loc.lat, loc.lon);
 }
 
-// Seed Categories
+// 2. Справочник категорий
 const insertCategory = db.prepare('INSERT OR REPLACE INTO categories (id, name, icon, type) VALUES (?, ?, ?, ?)');
 for (const cat of categories) {
   insertCategory.run(cat.id, cat.name, cat.icon, cat.type);
 }
 
-// Seed Users
-db.exec('DELETE FROM users');
-const insertUser = db.prepare(`
-  INSERT INTO users (id, phone, telegram_username, display_name, status, inn, is_verified, auth_token, created_at, updated_at)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+// 3. Полное обнуление динамических данных (чистый ноль карточек, пользователей и жалоб)
+db.exec(`
+  DELETE FROM listings;
+  DELETE FROM users;
+  DELETE FROM reports;
+  DELETE FROM sqlite_sequence WHERE name IN ('listings', 'users', 'reports');
 `);
 
-const nowIso = new Date().toISOString();
-insertUser.run(1, '79039551234', '', 'Бабушка Анна (Дачница)', 'basic', null, 0, 'kol_demo_basic', nowIso, nowIso);
-insertUser.run(2, '79138209988', 'mikhail_septik', 'Михаил (ЗИЛ - Мастер)', 'pro', '701712345678', 1, 'kol_demo_pro', nowIso, nowIso);
-insertUser.run(3, '79528884567', 'valya_kozy', 'Ферма «Заречье» (ЛПХ)', 'verified', '701498765432', 1, 'kol_demo_verified', nowIso, nowIso);
-
-// Seed Listings (clean first)
-db.exec('DELETE FROM listings');
-const insertListing = db.prepare(`
-  INSERT INTO listings (
-    title, description, type, category_id, location_name, address_detail,
-    price, price_unit, contact_name, contact_phone, contact_telegram,
-    image_url, is_boosted, boosted_until, created_at, updated_at,
-    user_id, status, expires_at
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-`);
-
-for (let i = 0; i < sampleListings.length; i++) {
-  const it = sampleListings[i];
-  // Распределяем пользователей: Бабушка Анна (1), Михаил (2), Ферма (3)
-  const userId = (i % 3 === 0) ? 1 : (i % 3 === 1 ? 3 : 2);
-  const ttlDays = userId === 3 ? 60 : (userId === 2 ? 30 : 5);
-  const expiresAt = new Date(Date.now() + ttlDays * 24 * 3600000).toISOString();
-
-  insertListing.run(
-    it.title, it.description, it.type, it.category_id, it.location_name, it.address_detail,
-    it.price, it.price_unit, it.contact_name, it.contact_phone, it.contact_telegram,
-    it.image_url, it.is_boosted, it.boosted_until, it.created_at, it.updated_at,
-    userId, 'active', expiresAt
-  );
-}
-
-// Seed Graph Relationships (Граф загородных потребностей)
+// 4. Граф загородных потребностей (механика и логика рекомендаций)
 const graphEdges = [
   // Молоко и сыр
   { source: 'dairy', target: 'eggs', type: 'complement', label: 'Фермерская корзина', weight: 0.95 },
@@ -296,9 +101,10 @@ for (const edge of graphEdges) {
   insertEdge.run(edge.source, edge.target, edge.type, edge.label, edge.weight);
 }
 
-console.log('🌾 [Seed] Данные успешно загружены:');
-console.log(`   - Локаций: ${locations.length}`);
+console.log('🌾 [Reset] База данных очищена под чистый ноль:');
+console.log(`   - Объявлений (Listings): 0`);
+console.log(`   - Пользователей (Users): 0`);
+console.log(`   - Жалоб (Reports): 0`);
+console.log(`   - Локаций в каталоге: ${locations.length}`);
 console.log(`   - Категорий: ${categories.length}`);
-console.log(`   - Тестовых объявлений: ${sampleListings.length}`);
-console.log(`   - Графовых связей (Edges): ${graphEdges.length}`);
-
+console.log(`   - Графовых связей движка: ${graphEdges.length}`);
