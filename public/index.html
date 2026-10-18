@@ -7,13 +7,13 @@
   <meta name="description" content="Свежие фермерские продукты и дачные услуги прямо у вас в поселке.">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#dc2626">
-  <link rel="stylesheet" href="/styles.css?v=4.1">
+  <link rel="stylesheet" href="/styles.css?v=4.2">
   <script>
-    // Зачистка устаревших кэшей Service Worker (v1/v2/v3)
+    // Зачистка устаревших кэшей Service Worker
     if ('caches' in window) {
       caches.keys().then(function(names) {
         names.forEach(function(name) {
-          if (name !== 'kollektiv-v4-clean') {
+          if (name !== 'kollektiv-v5-features') {
             console.log('[Kollektiv] Очистка устаревшего кэша:', name);
             caches.delete(name);
           }
@@ -90,6 +90,10 @@
           </div>
 
           <div class="header-right">
+            <button id="userProfileBtn" class="btn-profile-header">
+              <span id="userProfileIcon">👤</span>
+              <span id="userProfileLabel">Войти</span>
+            </button>
             <!-- Статус соединения: Соединение есть / Прерывает / Нет сети -->
             <div id="networkStatus" class="status-badge status-good">
               <span class="dot-indicator"></span>
@@ -180,8 +184,12 @@
           </div>
         </div>
 
-        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
-          Продавец / Мастер: <strong id="detailSeller" style="color: var(--text);"></strong>
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span>Автор: <strong id="detailSeller" style="color: var(--text);"></strong></span>
+            <span id="detailSellerBadge" class="user-status-pill user-status-basic"></span>
+          </div>
+          <div id="detailExpiresInfo" style="font-size: 0.75rem; color: var(--text-muted);"></div>
         </div>
 
         <p id="detailDescription" class="detail-description"></p>
@@ -199,6 +207,12 @@
         <button id="detailBoostBtn" class="btn-boost-full">
           ⚡ Закрепить в ТОПе района (49 ₽)
         </button>
+
+        <div style="text-align: right; margin-top: 4px;">
+          <button id="detailReportBtn" class="btn-report-link">
+            🚩 Пожаловаться соседям / модератору
+          </button>
+        </div>
 
         <!-- Блок графовых рекомендаций ("С этим часто ищут в вашем СНТ") -->
         <div id="detailGraphSection" class="graph-recs-wrap" style="display: none;">
@@ -225,6 +239,10 @@
       </div>
 
       <form id="postForm" style="padding: 20px;">
+        <div id="postStatusNotice" style="background: #fefce8; border: 1px solid #fef08a; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.8rem; margin-bottom: 14px; color: #854d0e;">
+          <!-- Статус автора и лимит -->
+        </div>
+
         <div class="form-field">
           <label>Тип объявления *</label>
           <select id="postType" required>
@@ -331,6 +349,129 @@
     </div>
   </div>
 
-  <script src="/app.js?v=4.1"></script>
+  <!-- Модальное окно профиля и статуса пользователя -->
+  <div id="userModal" class="modal-backdrop">
+    <div class="modal-sheet">
+      <div class="modal-header-bar">
+        <h3 id="userModalTitle" class="font-slab" style="font-size: 1.15rem;">Личный кабинет дачника</h3>
+        <button id="closeUserBtn" class="modal-close-icon">&times;</button>
+      </div>
+
+      <div style="padding: 20px;">
+        <!-- Вкладка НЕ авторизован -->
+        <div id="authGuestBox">
+          <p style="font-size: 0.88rem; color: #52525b; line-height: 1.5; margin-bottom: 16px;">
+            Войдите, чтобы управлять своими объявлениями («Продано» / «Продлить») и подтвердить статус самозанятого или фермера.
+          </p>
+
+          <form id="loginForm">
+            <div class="form-field">
+              <label>Ваше имя или название хозяйства *</label>
+              <input type="text" id="loginName" placeholder="Например: Анна Петровна или Пасека «Кедр»" required>
+            </div>
+            <div class="form-field">
+              <label>Телефон или Telegram</label>
+              <input type="text" id="loginContact" placeholder="+7 999 123-45-67 или @username">
+            </div>
+            <button type="submit" class="btn-contact phone" style="width: 100%; border-radius: var(--radius-sm);">
+              Войти без пароля
+            </button>
+          </form>
+
+          <div style="margin-top: 20px; padding-top: 16px; border-top: 1px dashed var(--border);">
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px;">Быстрый вход для тестирования статусов:</div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <button class="btn-demo-login" data-token="kol_demo_basic">
+                🟡 <strong>Бабушка Анна</strong> (Обычный дачник, лимит 2 объявления)
+              </button>
+              <button class="btn-demo-login" data-token="kol_demo_pro">
+                🟢 <strong>Михаил ЗИЛ</strong> (Самозанятый мастер, 10 объявлений, буст)
+              </button>
+              <button class="btn-demo-login" data-token="kol_demo_verified">
+                🔵 <strong>Ферма «Заречье»</strong> (Проверенное ЛПХ, безлимит)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Вкладка АВТОРИЗОВАН -->
+        <div id="authProfileBox" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+            <div>
+              <h4 id="profileName" class="font-slab" style="font-size: 1.1rem; margin-bottom: 4px;"></h4>
+              <div id="profileContact" style="font-size: 0.8rem; color: var(--text-muted);"></div>
+            </div>
+            <span id="profileStatusBadge" class="user-status-pill user-status-basic"></span>
+          </div>
+
+          <!-- Смена статуса / подтверждение юр. вопросов -->
+          <div style="background: #fdfcf9; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px;">
+            <div style="font-size: 0.82rem; font-weight: 700; margin-bottom: 6px;">Юридический статус аккаунта:</div>
+            <select id="profileStatusSelect" class="sidebar-select" style="margin-bottom: 8px;">
+              <option value="basic">🟡 Обычный (Дачник, излишки ЛПХ, до 2 объявлений)</option>
+              <option value="pro">🟢 Продвинутый (Самозанятый / ИП, до 10 объявлений, буст)</option>
+              <option value="verified">🔵 Цельный (Зарегистрированное ЛПХ / Ферма / КФХ, безлимит)</option>
+            </select>
+            <div id="profileInnField" style="display: none; margin-bottom: 8px;">
+              <input type="text" id="profileInnInput" placeholder="ИНН плательщика НПД (12 цифр)" style="width: 100%; font-size: 0.85rem; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px;">
+            </div>
+            <button id="saveStatusBtn" class="btn-action-sm" style="width: 100%;">
+              💾 Сохранить статус
+            </button>
+          </div>
+
+          <!-- Мои объявления -->
+          <div style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span class="font-slab" style="font-size: 0.95rem; font-weight: 700;">Мои объявления</span>
+              <span id="myListingsCount" style="font-size: 0.8rem; color: var(--text-muted);"></span>
+            </div>
+            <div id="myListingsContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto;">
+              <!-- Заполняется динамически -->
+            </div>
+          </div>
+
+          <button id="logoutBtn" class="btn-report-link" style="color: #ef4444; width: 100%; justify-content: center; margin-top: 8px;">
+            🚪 Выйти из профиля
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно подачи жалобы (модерация) -->
+  <div id="reportModal" class="modal-backdrop">
+    <div class="modal-sheet">
+      <div class="modal-header-bar">
+        <h3 class="font-slab" style="font-size: 1.15rem;">🚩 Пожаловаться на объявление</h3>
+        <button id="closeReportBtn" class="modal-close-icon">&times;</button>
+      </div>
+
+      <form id="reportForm" style="padding: 20px;">
+        <p style="font-size: 0.85rem; color: #52525b; line-height: 1.4; margin-bottom: 14px;">
+          Сообщите о нарушении правил платформы или закона (112-ФЗ, продажа алкоголя, мошенничество или товар уже продан).
+        </p>
+        <div class="form-field">
+          <label>Причина жалобы *</label>
+          <select id="reportReason" required>
+            <option value="Товар уже продан или не отвечает">Товар уже продан или продавец не отвечает</option>
+            <option value="Несоответствие описанию или качеству">Несоответствие описанию или качеству</option>
+            <option value="Запрещенный товар (алкоголь, браконьерство, оружие)">Запрещенный товар (алкоголь, оружие, яды)</option>
+            <option value="Спам или навязчивая реклама">Спам / навязчивая реклама</option>
+            <option value="Мошенничество или подозрительные действия">Мошенничество или подозрительные действия</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Комментарий (по желанию)</label>
+          <textarea id="reportComment" rows="2" placeholder="Дополнительные детали для модератора"></textarea>
+        </div>
+        <button type="submit" class="btn-contact phone" style="width: 100%; border-radius: var(--radius-sm); background: #ef4444;">
+          Отправить жалобу модератору
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/app.js?v=4.2"></script>
 </body>
 </html>

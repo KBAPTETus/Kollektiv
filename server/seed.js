@@ -206,21 +206,41 @@ for (const cat of categories) {
   insertCategory.run(cat.id, cat.name, cat.icon, cat.type);
 }
 
+// Seed Users
+db.exec('DELETE FROM users');
+const insertUser = db.prepare(`
+  INSERT INTO users (id, phone, telegram_username, display_name, status, inn, is_verified, auth_token, created_at, updated_at)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`);
+
+const nowIso = new Date().toISOString();
+insertUser.run(1, '79039551234', '', 'Бабушка Анна (Дачница)', 'basic', null, 0, 'kol_demo_basic', nowIso, nowIso);
+insertUser.run(2, '79138209988', 'mikhail_septik', 'Михаил (ЗИЛ - Мастер)', 'pro', '701712345678', 1, 'kol_demo_pro', nowIso, nowIso);
+insertUser.run(3, '79528884567', 'valya_kozy', 'Ферма «Заречье» (ЛПХ)', 'verified', '701498765432', 1, 'kol_demo_verified', nowIso, nowIso);
+
 // Seed Listings (clean first)
 db.exec('DELETE FROM listings');
 const insertListing = db.prepare(`
   INSERT INTO listings (
     title, description, type, category_id, location_name, address_detail,
     price, price_unit, contact_name, contact_phone, contact_telegram,
-    image_url, is_boosted, boosted_until, created_at, updated_at
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    image_url, is_boosted, boosted_until, created_at, updated_at,
+    user_id, status, expires_at
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 
-for (const it of sampleListings) {
+for (let i = 0; i < sampleListings.length; i++) {
+  const it = sampleListings[i];
+  // Распределяем пользователей: Бабушка Анна (1), Михаил (2), Ферма (3)
+  const userId = (i % 3 === 0) ? 1 : (i % 3 === 1 ? 3 : 2);
+  const ttlDays = userId === 3 ? 60 : (userId === 2 ? 30 : 5);
+  const expiresAt = new Date(Date.now() + ttlDays * 24 * 3600000).toISOString();
+
   insertListing.run(
     it.title, it.description, it.type, it.category_id, it.location_name, it.address_detail,
     it.price, it.price_unit, it.contact_name, it.contact_phone, it.contact_telegram,
-    it.image_url, it.is_boosted, it.boosted_until, it.created_at, it.updated_at
+    it.image_url, it.is_boosted, it.boosted_until, it.created_at, it.updated_at,
+    userId, 'active', expiresAt
   );
 }
 
