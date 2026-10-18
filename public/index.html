@@ -7,7 +7,27 @@
   <meta name="description" content="Свежие фермерские продукты и дачные услуги прямо у вас в поселке.">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#dc2626">
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles.css?v=4.1">
+  <script>
+    // Зачистка устаревших кэшей Service Worker (v1/v2/v3)
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        names.forEach(function(name) {
+          if (name !== 'kollektiv-v4-clean') {
+            console.log('[Kollektiv] Очистка устаревшего кэша:', name);
+            caches.delete(name);
+          }
+        });
+      });
+    }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (var reg of registrations) {
+          reg.update();
+        }
+      });
+    }
+  </script>
 </head>
 <body>
 
@@ -311,6 +331,6 @@
     </div>
   </div>
 
-  <script src="/app.js"></script>
+  <script src="/app.js?v=4.1"></script>
 </body>
 </html>

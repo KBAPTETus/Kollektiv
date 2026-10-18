@@ -19,7 +19,11 @@ const STATE = {
 // 1. Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW reg fail:', err));
+    navigator.serviceWorker.register('/sw.js?v=4.1')
+      .then(reg => {
+        reg.update();
+      })
+      .catch(err => console.log('SW reg fail:', err));
   });
 }
 
