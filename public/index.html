@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Kollektiv — Доска объявлений для СНТ, дач и деревень</title>
+  <meta name="description" content="Свежие фермерские продукты и дачные услуги прямо у вас в поселке.">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#15803d">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+  <!-- Sticky Header -->
+  <header>
+    <div class="top-bar">
+      <a href="/" class="logo">
+        <span>🌾</span> Kollektiv
+      </a>
+      <span id="networkStatus" class="network-badge online">
+        🟢 Онлайн (H+)
+      </span>
+    </div>
+
+    <div class="controls-container">
+      <!-- Поиск -->
+      <div class="search-box">
+        <input type="search" id="searchInput" placeholder="🔍 Найти яйца, молоко, ассенизатор, трактор..." autocomplete="off">
+      </div>
+
+      <!-- Табы: Все / Товары / Услуги -->
+      <div class="tabs">
+        <button class="tab-btn active" data-type="">Все объявления</button>
+        <button class="tab-btn" data-type="goods">🥚 Продукты (C2C)</button>
+        <button class="tab-btn" data-type="services">🚜 Услуги (B2C)</button>
+      </div>
+
+      <!-- Локация -->
+      <div class="row-filters">
+        <select id="locationFilter" class="filter-select">
+          <option value="all">📍 Все локации</option>
+        </select>
+      </div>
+
+      <!-- Категории (Скролл-пилюли) -->
+      <div id="categoryPills" class="categories-scroll"></div>
+    </div>
+  </header>
+
+  <!-- Лента объявлений -->
+  <main>
+    <div class="feed-header">
+      <span id="resultsCount">Загрузка объявлений...</span>
+      <span>Сортировка: Сначала ТОП района</span>
+    </div>
+
+    <div id="listingsContainer" class="listings-grid">
+      <!-- Карточки рендерятся через app.js -->
+    </div>
+  </main>
+
+  <!-- Плавающая кнопка публикации -->
+  <button id="openPostBtn" class="fab">
+    <span>✍️</span> Подать объявление
+  </button>
+
+  <!-- Модальное окно создания объявления -->
+  <div id="postModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem; font-weight: 700;">Новое объявление</h3>
+        <button id="closePostBtn" class="close-btn">&times;</button>
+      </div>
+
+      <form id="postForm">
+        <div class="form-group">
+          <label>Тип предложения *</label>
+          <select id="postType" required>
+            <option value="goods">🥚 Свежие продукты / Свое хозяйство (C2C)</option>
+            <option value="services">🚜 Дачная услуга / Работа / Мастер (B2C/C2C)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Категория *</label>
+          <select id="postCategory" required></select>
+        </div>
+
+        <div class="form-group">
+          <label>Название объявления *</label>
+          <input type="text" id="postTitle" placeholder="Например: Домашние яйца (куры на зерне)" required maxlength="90">
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <div class="form-group" style="flex: 2;">
+            <label>Цена (руб.)</label>
+            <input type="number" id="postPrice" placeholder="150" min="0">
+          </div>
+          <div class="form-group" style="flex: 3;">
+            <label>Единица измерения</label>
+            <input type="text" id="postUnit" placeholder="руб/десяток, руб/рейс">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Ваш СНТ или Посёлок *</label>
+          <select id="postLocation" required></select>
+        </div>
+
+        <div class="form-group">
+          <label>Ориентир на дачах (Улица, номер участка)</label>
+          <input type="text" id="postAddress" placeholder="ул. Садовая, уч. 25 возле водокачки">
+        </div>
+
+        <div class="form-group">
+          <label>Описание</label>
+          <textarea id="postDescription" rows="3" placeholder="Расскажите подробнее: время сбора, объем, условия заезда..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Фотография (Сжимается прямо на телефоне)</label>
+          <input type="file" id="postPhoto" accept="image/*" capture="environment">
+          <div id="imgPreview" class="img-preview-box">
+            <span style="font-size:0.8rem; color:var(--text-muted);">Фото не выбрано (опционально)</span>
+          </div>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid var(--border); margin: 16px 0;">
+
+        <div class="form-group">
+          <label>Ваше имя / Как обращаться *</label>
+          <input type="text" id="postName" placeholder="Бабушка Нина или Андрей (Мастер)" required>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <div class="form-group" style="flex: 1;">
+            <label>Телефон для связи</label>
+            <input type="tel" id="postPhone" placeholder="+7 999 123-45-67">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Telegram (ник или ссылка)</label>
+            <input type="text" id="postTelegram" placeholder="@my_tg_username">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 8px; font-size: 1rem;">
+          Опубликовать объявление
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Модальное окно буста (симуляция эквайринга самозанятого) -->
+  <div id="boostModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem; font-weight: 700;">⚡ Поднять объявление в ТОП</h3>
+        <button id="closeBoostBtn" class="close-btn">&times;</button>
+      </div>
+
+      <div style="padding: 4px 0 16px;">
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px;">
+          Объявление: <strong id="boostItemTitle"></strong>
+        </p>
+        <p style="font-size: 0.85rem; line-height: 1.4; color: #334155;">
+          Ваша карточка будет закреплена на 1-м месте в выбранном СНТ на 7 дней, подсвечена золотой рамкой и получит в 5 раз больше звонков от соседей.
+        </p>
+      </div>
+
+      <div id="boostReceiptBox" style="display: none; margin-bottom: 12px;"></div>
+
+      <button id="boostPayBtn" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem;">
+        Оплатить 49 ₽ через СБП
+      </button>
+
+      <p style="font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-top: 10px;">
+        Оплата принимается официально плательщиком НПД (самозанятым). Электронный чек отправляется автоматически.
+      </p>
+    </div>
+  </div>
+
+  <!-- Footer с юридическими реквизитами -->
+  <footer>
+    <p><strong>Kollektiv</strong> — Гиперлокальная цифровая доска объявлений для дачных сообществ.</p>
+    <p style="margin-top: 4px;">
+      Информационный посредник (ст. 1253.1 ГК РФ). Администратор: плательщик НПД (самозанятый).
+    </p>
+    <p style="margin-top: 4px;">
+      Расчёты за товары и услуги осуществляются напрямую между покупателем и продавцом.
+    </p>
+    <p style="margin-top: 8px;">
+      <a href="#rules" onclick="alert('Условия: Сервис Kollektiv предоставляет информационное пространство. Продукция ЛПХ реализуется в соответствии со 112-ФЗ. Алкоголь и опасные грузы запрещены.')">Правила публикации</a> • 
+      <a href="#privacy" onclick="alert('Конфиденциальность: Персональные данные (имя, телефон) используются исключительно для связи по объявлениям. Серверы расположены в РФ (152-ФЗ).')">Политика 152-ФЗ</a>
+    </p>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

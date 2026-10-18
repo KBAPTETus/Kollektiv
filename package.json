@@ -1,0 +1,28 @@
+{
+  "name": "kollektiv",
+  "version": "1.0.0",
+  "description": "Kollektiv — гиперлокальная легковесная платформа частных объявлений для дач, СНТ и деревень",
+  "main": "server/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/app.js",
+    "seed": "node server/seed.js",
+    "dev": "node --watch server/app.js"
+  },
+  "keywords": [
+    "hyperlocal",
+    "marketplace",
+    "pwa",
+    "offline-first",
+    "low-bandwidth",
+    "dacha",
+    "snt"
+  ],
+  "author": "Kollektiv Team",
+  "license": "MIT",
+  "dependencies": {
+    "compression": "^1.8.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
