@@ -6,59 +6,98 @@
   <title>KOLLEKTIV. — Доска объявлений для СНТ, дач и деревень</title>
   <meta name="description" content="Свежие фермерские продукты и дачные услуги прямо у вас в поселке.">
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#dc2626">
+  <meta name="theme-color" content="#e25c5c">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
 
-  <!-- Top Minimalist Header -->
-  <header>
-    <div class="header-inner">
-      <a href="/" class="logo-wrap">
-        <span class="logo">KOLLEKTIV<span class="dot">.</span></span>
-        <span class="logo-tag">СНТ & Посёлки</span>
+  <!-- 1. Отдельная нежно-красная шапка со скругленными краями -->
+  <header class="site-header">
+    <div class="header-card">
+      <a href="/" class="logo-link">
+        <span class="logo font-slab">KOLLEKTIV<span class="dot">.</span></span>
+        <span class="logo-badge">СНТ & Посёлки</span>
       </a>
 
-      <div class="header-actions">
-        <div id="networkStatus" class="status-pill online">
-          <span class="indicator"></span>
+      <div class="header-right">
+        <div id="networkStatus" class="status-badge">
+          <span class="dot-indicator"></span>
           <span>H+ Онлайн</span>
         </div>
       </div>
     </div>
-
-    <!-- Clean, uncluttered filter controls -->
-    <div class="filter-bar">
-      <div class="search-row">
-        <div class="search-input-wrap">
-          <span class="search-icon">🔍</span>
-          <input type="search" id="searchInput" placeholder="Поиск: молоко, яйца, ассенизатор, дрова..." autocomplete="off">
-        </div>
-        
-        <select id="locationFilter" class="location-dropdown">
-          <option value="all">📍 Все локации</option>
-        </select>
-      </div>
-
-      <!-- Segmented Type Switcher (Красный акцент) -->
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-        <div class="segmented-control">
-          <button class="segment-btn active" data-type="">Все предложения</button>
-          <button class="segment-btn" data-type="goods">Товары (C2C)</button>
-          <button class="segment-btn" data-type="services">Услуги мастеров</button>
-        </div>
-      </div>
-
-      <!-- Category Pills -->
-      <div id="categoryPills" class="category-tags"></div>
-    </div>
   </header>
 
-  <!-- Feed -->
+  <!-- 2. Разгруженная панель поиска и быстрой навигации -->
+  <div class="search-bar-wrap">
+    <div class="search-box-row">
+      <div class="search-input-container">
+        <span class="search-icon-svg">🔍</span>
+        <input type="search" id="searchInput" placeholder="Поиск: яйца, молоко, ассенизатор, дрова..." autocomplete="off">
+      </div>
+
+      <!-- Кнопка вызова шторки с категориями и локациями -->
+      <button id="openDrawerBtn" class="btn-open-drawer">
+        <span>🏷️ Фильтры</span>
+        <span id="activeFilterBadge" class="filter-active-count" style="display: none;">1</span>
+      </button>
+    </div>
+
+    <!-- Быстрые переключатели: Все / Товары / Услуги + превью фильтра -->
+    <div class="quick-types-row">
+      <div class="segmented-pill">
+        <button class="segment-item active" data-type="">Все</button>
+        <button class="segment-item" data-type="goods">Товары (C2C)</button>
+        <button class="segment-item" data-type="services">Услуги мастеров</button>
+      </div>
+
+      <div class="current-filter-preview">
+        Локация: <strong id="currentLocationLabel">Все СНТ</strong> • 
+        Категория: <strong id="currentCategoryLabel">Все</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Шторка подкатегорий и фильтров (Slide-up Drawer) -->
+  <div id="filterDrawer" class="drawer-backdrop">
+    <div class="drawer-pane">
+      <div class="drawer-handle-bar"></div>
+
+      <div class="drawer-header">
+        <h3 class="drawer-title font-slab">Категории и фильтры</h3>
+        <button id="closeDrawerBtn" class="drawer-close-btn">&times;</button>
+      </div>
+
+      <div class="drawer-content">
+        <!-- Выбор локации -->
+        <div>
+          <label class="drawer-section-label">📍 Ваш район / СНТ / Посёлок</label>
+          <select id="drawerLocationSelect" class="drawer-locations-select">
+            <option value="all">📍 Все локации и СНТ</option>
+          </select>
+        </div>
+
+        <!-- Подкатегории товаров и услуг -->
+        <div>
+          <label class="drawer-section-label">🌾 Выберите подкатегорию</label>
+          <div id="drawerCategoriesContainer" class="drawer-chips-grid">
+            <!-- Чипсы категорий рендерятся динамически -->
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer-footer">
+        <button id="resetDrawerBtn" class="btn-drawer-reset">Сбросить</button>
+        <button id="applyDrawerBtn" class="btn-drawer-apply">Показать объявления</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Лента объявлений (Сетка карточек) -->
   <main>
-    <div class="feed-header">
-      <span id="resultsCount" class="count">Загрузка каталога...</span>
-      <span class="badge-live">Прямой контакт без комиссий</span>
+    <div class="feed-status-bar">
+      <span id="resultsCount">Загрузка каталога...</span>
+      <span>Сортировка: Сначала ТОП района</span>
     </div>
 
     <div id="listingsContainer" class="grid">
@@ -66,12 +105,12 @@
     </div>
   </main>
 
-  <!-- Floating Publish Button -->
+  <!-- Плавающая кнопка подачи объявления -->
   <button id="openPostBtn" class="fab-create">
-    <span style="font-size: 1.1rem; line-height: 1;">＋</span> Подать объявление
+    <span style="font-size: 1.2rem; line-height: 1;">＋</span> Подать объявление
   </button>
 
-  <!-- Карточка подробного просмотра (Открывается при клике на объявление) -->
+  <!-- Модальное окно подробного просмотра карточки при клике -->
   <div id="detailModal" class="modal-backdrop">
     <div class="modal-sheet">
       <div class="modal-header-bar">
@@ -79,9 +118,7 @@
         <button id="closeDetailBtn" class="modal-close-icon">&times;</button>
       </div>
 
-      <div id="detailMediaWrap">
-        <!-- Изображение рендерится динамически -->
-      </div>
+      <div id="detailMediaWrap"></div>
 
       <div class="detail-body">
         <h2 id="detailTitle" class="modal-title font-slab"></h2>
@@ -99,13 +136,13 @@
           </div>
         </div>
 
-        <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
           Продавец / Мастер: <strong id="detailSeller" style="color: var(--text);"></strong>
         </div>
 
         <p id="detailDescription" class="detail-description"></p>
 
-        <!-- Кнопки связи -->
+        <!-- Кнопки прямого контакта -->
         <div class="detail-actions-grid">
           <a id="detailCallBtn" href="#" class="btn-contact phone">
             📞 Позвонить
@@ -122,7 +159,7 @@
     </div>
   </div>
 
-  <!-- Модальное окно публикации нового объявления -->
+  <!-- Модальное окно создания объявления -->
   <div id="postModal" class="modal-backdrop">
     <div class="modal-sheet">
       <div class="modal-header-bar">
@@ -134,7 +171,7 @@
         <div class="form-field">
           <label>Тип объявления *</label>
           <select id="postType" required>
-            <option value="goods">Товары со своего хозяйства / излишки (C2C)</option>
+            <option value="goods">Товары своего хозяйства / излишки (C2C)</option>
             <option value="services">Дачные услуги / мастер / техника (B2C/C2C)</option>
           </select>
         </div>
@@ -146,7 +183,7 @@
 
         <div class="form-field">
           <label>Что вы предлагаете? *</label>
-          <input type="text" id="postTitle" placeholder="Например: Свежее козье молоко или Вспашка огорода" required maxlength="90">
+          <input type="text" id="postTitle" placeholder="Например: Домашние куриные яйца или Откачка септиков" required maxlength="90">
         </div>
 
         <div style="display: flex; gap: 10px;">
@@ -156,7 +193,7 @@
           </div>
           <div class="form-field" style="flex: 1;">
             <label>Единица</label>
-            <input type="text" id="postUnit" placeholder="руб/литр, руб/рейс">
+            <input type="text" id="postUnit" placeholder="руб/десяток, руб/рейс">
           </div>
         </div>
 
@@ -171,8 +208,8 @@
         </div>
 
         <div class="form-field">
-          <label>Подробности</label>
-          <textarea id="postDescription" rows="3" placeholder="Опишите подробнее: время сбора, объёмы, условия..."></textarea>
+          <label>Подробное описание</label>
+          <textarea id="postDescription" rows="3" placeholder="Опишите подробности: время сбора, объёмы, условия заезда..."></textarea>
         </div>
 
         <div class="form-field">
@@ -186,7 +223,7 @@
         <div style="border-top: 1px solid var(--border); margin: 16px 0; padding-top: 16px;">
           <div class="form-field">
             <label>Ваше имя / Как обращаться *</label>
-            <input type="text" id="postName" placeholder="Нина Павловна или Михаил (Трактор)" required>
+            <input type="text" id="postName" placeholder="Бабушка Нина или Андрей (Мастер)" required>
           </div>
 
           <div style="display: flex; gap: 10px;">
@@ -208,7 +245,7 @@
     </div>
   </div>
 
-  <!-- Модальное окно буста (симуляция СБП) -->
+  <!-- Модальное окно буста (симуляция эквайринга самозанятого) -->
   <div id="boostModal" class="modal-backdrop">
     <div class="modal-sheet">
       <div class="modal-header-bar">
@@ -221,7 +258,7 @@
           Объявление: <strong id="boostItemTitle" class="font-slab"></strong>
         </p>
         <p style="font-size: 0.85rem; line-height: 1.5; color: #52525b; margin-bottom: 16px;">
-          Карточка закрепляется на 1-м месте в выбранном СНТ на 7 дней, подсвечивается красной рамкой и привлекает максимум соседей.
+          Карточка закрепляется на 1-м месте в выбранном СНТ на 7 дней, подсвечивается рамкой и привлекает в 5 раз больше соседей.
         </p>
 
         <div id="boostReceiptBox" style="display: none; margin-bottom: 16px;"></div>
@@ -239,7 +276,7 @@
 
   <!-- Minimalist Editorial Footer -->
   <footer>
-    <div class="brand-mark">KOLLEKTIV<span class="dot">.</span></div>
+    <div class="brand-mark font-slab">KOLLEKTIV<span class="dot">.</span></div>
     <p>Гиперлокальный классифайд для загородных сообществ и поселков.</p>
     <p style="margin-top: 4px; font-size: 0.75rem;">
       Информационный посредник (ст. 1253.1 ГК РФ). Администратор: плательщик НПД (самозанятый). Прямые расчеты между покупателем и продавцом.

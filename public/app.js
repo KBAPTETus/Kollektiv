@@ -1,4 +1,4 @@
-// Kollektiv — Minimalist Red & White Low-Bandwidth Client Engine
+// Kollektiv — Minimalist Soft-Red Client with Slide-up Drawer & Offline-First Engine
 
 const STATE = {
   listings: [],
@@ -9,6 +9,10 @@ const STATE = {
     category: 'all',
     location: 'all',
     search: ''
+  },
+  tempDrawerFilters: {
+    category: 'all',
+    location: 'all'
   },
   lastSync: localStorage.getItem('kollektiv_last_sync') || null,
   cachedCompressedImage: null,
@@ -25,11 +29,9 @@ if ('serviceWorker' in navigator) {
 function updateOnlineStatus() {
   const badge = document.getElementById('networkStatus');
   if (navigator.onLine) {
-    badge.className = 'status-pill online';
-    badge.innerHTML = '<span class="indicator"></span><span>H+ Онлайн</span>';
+    badge.innerHTML = '<span class="dot-indicator"></span><span>H+ Онлайн</span>';
   } else {
-    badge.className = 'status-pill';
-    badge.innerHTML = '<span class="indicator" style="background:#ea580c"></span><span>Оффлайн кэш</span>';
+    badge.innerHTML = '<span class="dot-indicator" style="background:#f97316"></span><span>Оффлайн кэш</span>';
   }
 }
 window.addEventListener('online', updateOnlineStatus);
@@ -103,7 +105,7 @@ async function loadInitialData() {
     }
     if (catsRes.ok) {
       STATE.categories = await catsRes.json();
-      renderCategoryPills();
+      renderDrawerCategories();
     }
   } catch (err) {
     console.log('Справочники загружены из кэша');
@@ -163,10 +165,10 @@ function renderListings() {
 
   if (filtered.length === 0) {
     container.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: #fff; border-radius: 12px; border: 1px dashed var(--border);">
+      <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: #fff; border-radius: 14px; border: 1px dashed var(--border);">
         <p style="font-size: 2rem; margin-bottom: 8px;">🌾</p>
-        <p class="font-slab" style="font-size: 1.1rem; font-weight: 700;">В этой категории пока пусто</p>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Разместите первое предложение для ваших соседей!</p>
+        <p class="font-slab" style="font-size: 1.15rem; font-weight: 700;">В этой категории пока пусто</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Разместите первое объявление для соседей!</p>
       </div>
     `;
     return;
@@ -226,26 +228,24 @@ window.openDetailModal = function(id) {
   document.getElementById('detailLocation').textContent = item.location_name;
   document.getElementById('detailAddress').textContent = item.address_detail ? ` • ${item.address_detail}` : '';
   document.getElementById('detailSeller').textContent = item.contact_name;
-  document.getElementById('detailDescription').textContent = item.description || 'Описание не указано продавцом. Свяжитесь по контактам ниже для уточнения деталей.';
+  document.getElementById('detailDescription').textContent = item.description || 'Описание не указано. Свяжитесь с продавцом для уточнения деталей.';
   
   const typeBadge = document.getElementById('detailTypeBadge');
   const isGoods = item.type === 'goods';
   typeBadge.textContent = isGoods ? '🌾 Продукт хозяйства (C2C)' : '🚜 Услуга мастера (B2C/C2C)';
   typeBadge.className = isGoods ? 'detail-type-badge' : 'detail-type-badge service';
 
-  // Hero Image
   const mediaWrap = document.getElementById('detailMediaWrap');
   if (item.image_url) {
     mediaWrap.innerHTML = `<img src="${item.image_url}" alt="${escapeHtml(item.title)}" class="detail-hero-media" />`;
   } else {
     mediaWrap.innerHTML = `
-      <div style="height: 140px; display: flex; align-items: center; justify-content: center; background: #f4f4f5; font-size: 3rem;">
+      <div style="height: 140px; display: flex; align-items: center; justify-content: center; background: #eceae3; font-size: 3rem;">
         ${isGoods ? '🧺' : '🛠️'}
       </div>
     `;
   }
 
-  // Call & Telegram Buttons
   const callBtn = document.getElementById('detailCallBtn');
   const tgBtn = document.getElementById('detailTgBtn');
 
@@ -265,7 +265,6 @@ window.openDetailModal = function(id) {
     tgBtn.style.display = 'none';
   }
 
-  // Boost trigger inside detail modal
   const boostBtn = document.getElementById('detailBoostBtn');
   boostBtn.onclick = () => {
     detailModal.style.display = 'none';
@@ -281,70 +280,138 @@ function closeDetail() {
   document.body.style.overflow = '';
 }
 closeDetailBtn.addEventListener('click', closeDetail);
-
-// Close on backdrop click
 detailModal.addEventListener('click', (e) => {
   if (e.target === detailModal) closeDetail();
 });
 
-// 6. Filter Controls
-function populateLocationsSelect() {
-  const sel = document.getElementById('locationFilter');
-  const postSel = document.getElementById('postLocation');
-  
-  sel.innerHTML = '<option value="all">📍 Все локации</option>' + 
-    STATE.locations.map(l => `<option value="${l.name}">${l.name}</option>`).join('');
+// 6. Шторка категорий и фильтров (Filter Drawer)
+const filterDrawer = document.getElementById('filterDrawer');
+const openDrawerBtn = document.getElementById('openDrawerBtn');
+const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+const applyDrawerBtn = document.getElementById('applyDrawerBtn');
+const resetDrawerBtn = document.getElementById('resetDrawerBtn');
+const drawerLocSelect = document.getElementById('drawerLocationSelect');
+const drawerCatsContainer = document.getElementById('drawerCategoriesContainer');
 
-  postSel.innerHTML = STATE.locations.map(l => `<option value="${l.name}">${l.name}</option>`).join('');
+function openDrawer() {
+  STATE.tempDrawerFilters.category = STATE.filters.category;
+  STATE.tempDrawerFilters.location = STATE.filters.location;
+  drawerLocSelect.value = STATE.filters.location;
+  renderDrawerCategories();
+  filterDrawer.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
 }
 
-function renderCategoryPills() {
-  const container = document.getElementById('categoryPills');
-  const postCatSel = document.getElementById('postCategory');
+function closeDrawer() {
+  filterDrawer.style.display = 'none';
+  document.body.style.overflow = '';
+}
 
+openDrawerBtn.addEventListener('click', openDrawer);
+closeDrawerBtn.addEventListener('click', closeDrawer);
+filterDrawer.addEventListener('click', (e) => {
+  if (e.target === filterDrawer) closeDrawer();
+});
+
+function renderDrawerCategories() {
   let activeCats = STATE.categories;
   if (STATE.filters.type) {
     activeCats = activeCats.filter(c => c.type === STATE.filters.type);
   }
 
-  container.innerHTML = `
-    <button class="tag-btn ${STATE.filters.category === 'all' ? 'active' : ''}" onclick="selectCategory('all')">
-      Все
+  drawerCatsContainer.innerHTML = `
+    <button class="chip-btn ${STATE.tempDrawerFilters.category === 'all' ? 'active' : ''}" onclick="selectTempCategory('all')">
+      Все категории
     </button>
     ${activeCats.map(c => `
-      <button class="tag-btn ${STATE.filters.category === c.id ? 'active' : ''}" onclick="selectCategory('${c.id}')">
+      <button class="chip-btn ${STATE.tempDrawerFilters.category === c.id ? 'active' : ''}" onclick="selectTempCategory('${c.id}')">
         ${c.icon} ${c.name}
       </button>
     `).join('')}
   `;
+}
 
+window.selectTempCategory = function(catId) {
+  STATE.tempDrawerFilters.category = catId;
+  renderDrawerCategories();
+};
+
+drawerLocSelect.addEventListener('change', (e) => {
+  STATE.tempDrawerFilters.location = e.target.value;
+});
+
+applyDrawerBtn.addEventListener('click', () => {
+  STATE.filters.category = STATE.tempDrawerFilters.category;
+  STATE.filters.location = STATE.tempDrawerFilters.location;
+  updateFilterBadges();
+  renderListings();
+  syncListingsWithServer();
+  closeDrawer();
+});
+
+resetDrawerBtn.addEventListener('click', () => {
+  STATE.tempDrawerFilters.category = 'all';
+  STATE.tempDrawerFilters.location = 'all';
+  drawerLocSelect.value = 'all';
+  renderDrawerCategories();
+  STATE.filters.category = 'all';
+  STATE.filters.location = 'all';
+  updateFilterBadges();
+  renderListings();
+  syncListingsWithServer();
+  closeDrawer();
+});
+
+function updateFilterBadges() {
+  const locLabel = document.getElementById('currentLocationLabel');
+  const catLabel = document.getElementById('currentCategoryLabel');
+  const badge = document.getElementById('activeFilterBadge');
+
+  locLabel.textContent = STATE.filters.location === 'all' ? 'Все СНТ' : STATE.filters.location;
+
+  if (STATE.filters.category === 'all') {
+    catLabel.textContent = 'Все';
+  } else {
+    const cat = STATE.categories.find(c => c.id === STATE.filters.category);
+    catLabel.textContent = cat ? `${cat.icon} ${cat.name}` : STATE.filters.category;
+  }
+
+  let activeCount = 0;
+  if (STATE.filters.location !== 'all') activeCount++;
+  if (STATE.filters.category !== 'all') activeCount++;
+
+  if (activeCount > 0) {
+    badge.textContent = activeCount;
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function populateLocationsSelect() {
+  const postSel = document.getElementById('postLocation');
+  const postCatSel = document.getElementById('postCategory');
+
+  drawerLocSelect.innerHTML = '<option value="all">📍 Все локации и СНТ</option>' + 
+    STATE.locations.map(l => `<option value="${l.name}">${l.name}</option>`).join('');
+
+  postSel.innerHTML = STATE.locations.map(l => `<option value="${l.name}">${l.name}</option>`).join('');
   postCatSel.innerHTML = STATE.categories.map(c => `<option value="${c.id}">${c.icon} ${c.name} (${c.type === 'goods' ? 'Товар' : 'Услуга'})</option>`).join('');
 }
 
-function selectCategory(catId) {
-  STATE.filters.category = catId;
-  renderCategoryPills();
-  renderListings();
-  syncListingsWithServer();
-}
-
-// Type Switcher
-document.querySelectorAll('.segment-btn').forEach(btn => {
+// Quick Type Segmented Pills
+document.querySelectorAll('.segment-item').forEach(btn => {
   btn.addEventListener('click', (e) => {
-    document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.segment-item').forEach(b => b.classList.remove('active'));
     e.target.classList.add('active');
     STATE.filters.type = e.target.dataset.type;
     STATE.filters.category = 'all';
-    renderCategoryPills();
+    STATE.tempDrawerFilters.category = 'all';
+    updateFilterBadges();
+    renderDrawerCategories();
     renderListings();
     syncListingsWithServer();
   });
-});
-
-document.getElementById('locationFilter').addEventListener('change', (e) => {
-  STATE.filters.location = e.target.value;
-  renderListings();
-  syncListingsWithServer();
 });
 
 let searchDebounce;
@@ -357,7 +424,7 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
   }, 220);
 });
 
-// 7. Post Form (Client-Side Compression)
+// 7. Post Modal
 const postModal = document.getElementById('postModal');
 const postForm = document.getElementById('postForm');
 const fileInput = document.getElementById('postPhoto');
@@ -381,7 +448,7 @@ fileInput.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
-  previewBox.innerHTML = '<span style="color:var(--red);">Сжатие фото прямо в браузере...</span>';
+  previewBox.innerHTML = '<span style="color:var(--header-red);">Сжатие фото прямо в браузере...</span>';
   try {
     const { dataUrl, sizeKb } = await compressImageOnClient(file, 800, 0.75);
     STATE.cachedCompressedImage = dataUrl;
@@ -500,11 +567,11 @@ document.getElementById('boostPayBtn').addEventListener('click', async () => {
       receiptBox.style.display = 'block';
       receiptBox.innerHTML = `
         <div style="background:#fef2f2; border:1px solid #fee2e2; padding:14px; border-radius:8px; font-size:0.85rem;">
-          <p class="font-slab" style="font-weight:700; color:var(--red); font-size:1rem; margin-bottom:4px;">★ Оплата 49 ₽ проведена успешно</p>
+          <p class="font-slab" style="font-weight:700; color:var(--header-red); font-size:1rem; margin-bottom:4px;">★ Оплата 49 ₽ проведена успешно</p>
           <p><strong>Услуга:</strong> ${data.receipt.service}</p>
           <p><strong>Исполнитель:</strong> ${data.receipt.provider}</p>
           <p><strong>Закрепление в ТОПе:</strong> до ${new Date(data.boosted_until).toLocaleDateString()}</p>
-          <p style="font-size:0.75rem; color:#71717a; margin-top:8px;">Электронный чек сформирован в системе «Мой налог» (422-ФЗ).</p>
+          <p style="font-size:0.75rem; color:#78716c; margin-top:8px;">Электронный чек сформирован в системе «Мой налог» (422-ФЗ).</p>
         </div>
       `;
       const item = STATE.listings.find(x => x.id === targetBoostId);
@@ -524,6 +591,7 @@ document.getElementById('boostPayBtn').addEventListener('click', async () => {
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     closeDetail();
+    closeDrawer();
     closePost();
     closeBoost();
   }
