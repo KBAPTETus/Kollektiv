@@ -179,6 +179,19 @@
         <button id="detailBoostBtn" class="btn-boost-full">
           ⚡ Закрепить в ТОПе района (49 ₽)
         </button>
+
+        <!-- Блок графовых рекомендаций ("С этим часто ищут в вашем СНТ") -->
+        <div id="detailGraphSection" class="graph-recs-wrap" style="display: none;">
+          <div class="graph-recs-header">
+            <span class="graph-recs-title font-slab">
+              <span>🕸️</span> Связанные предложения
+            </span>
+            <span class="graph-recs-subtitle">Граф связей СНТ</span>
+          </div>
+          <div id="detailGraphRecsContainer" class="graph-recs-grid">
+            <!-- Динамически заполняются из app.js -->
+          </div>
+        </div>
       </div>
     </div>
   </div>

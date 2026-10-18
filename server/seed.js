@@ -119,6 +119,78 @@ const sampleListings = [
     boosted_until: null,
     created_at: new Date(Date.now() - 3600000 * 30).toISOString(),
     updated_at: new Date(Date.now() - 3600000 * 30).toISOString()
+  },
+  {
+    title: 'Рассада сортовой клубники «Азия» и тепличных томатов',
+    description: 'Крепкая корневая система, закаленная рассада в стаканчиках. Сорта урожайные, адаптированы к сибирскому климату.',
+    type: 'goods',
+    category_id: 'plants',
+    location_name: 'СНТ «Восход»',
+    address_detail: 'ул. Садовая, уч. 74',
+    price: 45,
+    price_unit: 'руб/куст',
+    contact_name: 'Надежда Семеновна',
+    contact_phone: '+7 905 777-22-11',
+    contact_telegram: '',
+    image_url: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=600&q=80',
+    is_boosted: 0,
+    boosted_until: null,
+    created_at: new Date(Date.now() - 3600000 * 18).toISOString(),
+    updated_at: new Date(Date.now() - 3600000 * 18).toISOString()
+  },
+  {
+    title: 'Натуральный таежный мёд со своей пасеки (разнотравье)',
+    description: 'Качка текущего сезона, без сахара и химии. Густой, ароматный, с нотками донника и кипрея. Фасовка в стеклянные банки.',
+    type: 'goods',
+    category_id: 'honey',
+    location_name: 'СНТ «Кедр»',
+    address_detail: 'ул. Цветочная, уч. 12',
+    price: 700,
+    price_unit: 'руб/литр',
+    contact_name: 'Дядя Саша (Пасечник)',
+    contact_phone: '+7 952 111-22-33',
+    contact_telegram: 't.me/paseka_tomsk',
+    image_url: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=600&q=80',
+    is_boosted: 1,
+    boosted_until: '2026-10-28T23:59:59Z',
+    created_at: new Date(Date.now() - 3600000 * 8).toISOString(),
+    updated_at: new Date(Date.now() - 3600000 * 8).toISOString()
+  },
+  {
+    title: 'Покос травы, бурьяна и мелкого кустарника бензокосой',
+    description: 'Уборка участков под ключ, подготовка к продаже, обкос заборов и канав. Мощный профессиональный триммер Stihl.',
+    type: 'services',
+    category_id: 'mowing',
+    location_name: 'СНТ «Энергетик»',
+    address_detail: 'Выезд по всем СНТ Богашево и Лучаново',
+    price: 350,
+    price_unit: 'руб/сотка',
+    contact_name: 'Алексей (Покос)',
+    contact_phone: '+7 913 888-00-55',
+    contact_telegram: '',
+    image_url: 'https://images.unsplash.com/photo-1592417817098-8f3d6910985b?auto=format&fit=crop&w=600&q=80',
+    is_boosted: 0,
+    boosted_until: null,
+    created_at: new Date(Date.now() - 3600000 * 15).toISOString(),
+    updated_at: new Date(Date.now() - 3600000 * 15).toISOString()
+  },
+  {
+    title: 'Грузоперевозки на Газели (тент 4.2 м, грузоподъемность 1.5 т)',
+    description: 'Перевозка стройматериалов, досок, мебели, саженцев, навоза в мешках. Помощь с погрузкой. Чистый кузов.',
+    type: 'services',
+    category_id: 'cargo',
+    location_name: 'дер. Кисловка',
+    address_detail: 'Работаем по пригороду и СНТ',
+    price: 900,
+    price_unit: 'руб/час',
+    contact_name: 'Дмитрий (Газель)',
+    contact_phone: '+7 903 911-34-56',
+    contact_telegram: 't.me/dmitry_cargo',
+    image_url: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=600&q=80',
+    is_boosted: 0,
+    boosted_until: null,
+    created_at: new Date(Date.now() - 3600000 * 20).toISOString(),
+    updated_at: new Date(Date.now() - 3600000 * 20).toISOString()
   }
 ];
 
@@ -152,7 +224,61 @@ for (const it of sampleListings) {
   );
 }
 
+// Seed Graph Relationships (Граф загородных потребностей)
+const graphEdges = [
+  // Молоко и сыр
+  { source: 'dairy', target: 'eggs', type: 'complement', label: 'Фермерская корзина', weight: 0.95 },
+  { source: 'dairy', target: 'honey', type: 'complement', label: 'Свежий утренний сбор', weight: 0.85 },
+  { source: 'dairy', target: 'berries', type: 'complement', label: 'Ягоды к творогу', weight: 0.80 },
+
+  // Яйца
+  { source: 'eggs', target: 'dairy', type: 'complement', label: 'Фермерская корзина', weight: 0.95 },
+  { source: 'eggs', target: 'meat', type: 'complement', label: 'Птицеводство', weight: 0.85 },
+  { source: 'eggs', target: 'honey', type: 'complement', label: 'Домашние сладости', weight: 0.75 },
+
+  // Трактор / вспашка
+  { source: 'tractor', target: 'plants', type: 'lifecycle', label: 'Посадочный цикл', weight: 0.95 },
+  { source: 'tractor', target: 'cargo', type: 'tool', label: 'Вывоз грунта / урожая', weight: 0.85 },
+  { source: 'tractor', target: 'septic', type: 'seasonal', label: 'Подготовка участка', weight: 0.80 },
+
+  // Рассада и саженцы
+  { source: 'plants', target: 'tractor', type: 'tool', label: 'Вспашка под посадку', weight: 0.95 },
+  { source: 'plants', target: 'berries', type: 'lifecycle', label: 'Урожай и уход', weight: 0.90 },
+  { source: 'plants', target: 'honey', type: 'complement', label: 'Опыление и пасека', weight: 0.70 },
+
+  // Ассенизатор (ЖБО)
+  { source: 'septic', target: 'firewood', type: 'seasonal', label: 'Осенняя подготовка дома', weight: 0.90 },
+  { source: 'septic', target: 'electric', type: 'tool', label: 'Обслуживание насосов', weight: 0.85 },
+  { source: 'septic', target: 'tractor', type: 'tool', label: 'Земляные работы', weight: 0.75 },
+
+  // Дрова
+  { source: 'firewood', target: 'septic', type: 'seasonal', label: 'Консервация к зиме', weight: 0.90 },
+  { source: 'firewood', target: 'mowing', type: 'seasonal', label: 'Распил и спил деревьев', weight: 0.85 },
+  { source: 'firewood', target: 'honey', type: 'complement', label: 'Всё для бани', weight: 0.80 },
+
+  // Мёд
+  { source: 'honey', target: 'dairy', type: 'complement', label: 'Мёд с парным молоком', weight: 0.90 },
+  { source: 'honey', target: 'berries', type: 'complement', label: 'Сладкий стол', weight: 0.85 },
+  { source: 'honey', target: 'firewood', type: 'complement', label: 'Чай после бани', weight: 0.80 },
+
+  // Покос травы
+  { source: 'mowing', target: 'tractor', type: 'tool', label: 'Культивация целины', weight: 0.90 },
+  { source: 'mowing', target: 'cargo', type: 'tool', label: 'Вывоз скошенной травы', weight: 0.85 }
+];
+
+db.exec('DELETE FROM graph_edges');
+const insertEdge = db.prepare(`
+  INSERT OR REPLACE INTO graph_edges (source_category, target_category, relation_type, label, weight)
+  VALUES (?, ?, ?, ?, ?)
+`);
+
+for (const edge of graphEdges) {
+  insertEdge.run(edge.source, edge.target, edge.type, edge.label, edge.weight);
+}
+
 console.log('🌾 [Seed] Данные успешно загружены:');
 console.log(`   - Локаций: ${locations.length}`);
 console.log(`   - Категорий: ${categories.length}`);
 console.log(`   - Тестовых объявлений: ${sampleListings.length}`);
+console.log(`   - Графовых связей (Edges): ${graphEdges.length}`);
+

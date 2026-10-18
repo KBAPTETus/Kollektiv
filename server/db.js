@@ -54,6 +54,18 @@ export function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_listings_location ON listings(location_name);
     CREATE INDEX IF NOT EXISTS idx_listings_updated ON listings(updated_at);
     CREATE INDEX IF NOT EXISTS idx_listings_boost ON listings(is_boosted DESC, updated_at DESC);
+
+    -- Граф причинно-следственных связей между категориями и потребностями
+    CREATE TABLE IF NOT EXISTS graph_edges (
+      source_category TEXT NOT NULL,
+      target_category TEXT NOT NULL,
+      relation_type TEXT NOT NULL, -- 'tool', 'complement', 'lifecycle', 'seasonal'
+      label TEXT NOT NULL,          -- читаемый лейбл связи: 'Необходимый инструмент', 'С этим покупают'
+      weight REAL DEFAULT 1.0,     -- сила связи от 0.1 до 1.0
+      PRIMARY KEY (source_category, target_category)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_graph_edges_lookup ON graph_edges(source_category, weight DESC);
   `);
 
   console.log('✅ [Database] SQLite инициализирована успешно (WAL-режим включен).');

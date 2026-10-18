@@ -65,6 +65,60 @@ listingsRouter.get('/:id', (req, res) => {
   res.json(item);
 });
 
+// GET /api/listings/:id/recommendations (Графовый движок рекомендаций)
+listingsRouter.get('/:id/recommendations', (req, res) => {
+  const listingId = req.params.id;
+  const currentListing = db.prepare('SELECT * FROM listings WHERE id = ?').get(listingId);
+
+  if (!currentListing) {
+    return res.status(404).json({ error: 'Объявление не найдено' });
+  }
+
+  // 1. Ищем смежные категории по графу связей graph_edges
+  const edgeStmt = db.prepare(`
+    SELECT target_category, relation_type, label, weight
+    FROM graph_edges
+    WHERE source_category = ?
+    ORDER BY weight DESC
+    LIMIT 4
+  `);
+  const edges = edgeStmt.all(currentListing.category_id);
+
+  if (!edges || edges.length === 0) {
+    return res.json({ recommendations: [], graph_path: [] });
+  }
+
+  const recommendations = [];
+
+  // 2. Для каждого ребра графа находим подходящие объявления (предпочитая то же СНТ)
+  for (const edge of edges) {
+    const candidateStmt = db.prepare(`
+      SELECT * FROM listings 
+      WHERE category_id = ? AND id != ?
+      ORDER BY (location_name = ?) DESC, is_boosted DESC, datetime(created_at) DESC
+      LIMIT 1
+    `);
+    const candidate = candidateStmt.get(edge.target_category, listingId, currentListing.location_name);
+
+    if (candidate) {
+      recommendations.push({
+        ...candidate,
+        graph_edge: {
+          relation_type: edge.relation_type,
+          label: edge.label,
+          weight: edge.weight
+        }
+      });
+    }
+  }
+
+  res.json({
+    source_category: currentListing.category_id,
+    recommendations,
+    edges_traversed: edges.length
+  });
+});
+
 // POST /api/listings (создание нового объявления)
 listingsRouter.post('/', (req, res) => {
   const {

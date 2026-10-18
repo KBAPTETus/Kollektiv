@@ -817,6 +817,107 @@ body {
   background: var(--red-light);
 }
 
+/* Блок графовых рекомендаций в модальном окне карточки */
+.graph-recs-wrap {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--border);
+}
+
+.graph-recs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.graph-recs-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.graph-recs-subtitle {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.graph-recs-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.graph-rec-item {
+  background: #f7f6f2;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-align: left;
+}
+
+.graph-rec-item:hover {
+  background: var(--red-light);
+  border-color: var(--red-border);
+  transform: translateX(3px);
+}
+
+.graph-rec-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #e7e5df;
+  flex-shrink: 0;
+}
+
+.graph-rec-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.graph-rec-reason {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--red);
+  margin-bottom: 2px;
+}
+
+.graph-rec-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.graph-rec-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 2px;
+  font-size: 0.75rem;
+}
+
+.graph-rec-price {
+  font-weight: 700;
+  color: var(--red);
+}
+
 /* Форма публикации */
 .form-field {
   margin-bottom: 14px;

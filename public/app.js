@@ -318,9 +318,54 @@ window.openDetailModal = function(id) {
     openBoostModal(item.id, item.title);
   };
 
+  // Загрузка графовых рекомендаций для текущей карточки
+  loadGraphRecommendations(item.id);
+
   detailModal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 };
+
+async function loadGraphRecommendations(listingId) {
+  const section = document.getElementById('detailGraphSection');
+  const container = document.getElementById('detailGraphRecsContainer');
+  section.style.display = 'none';
+  container.innerHTML = '';
+
+  try {
+    const res = await fetch(`/api/listings/${listingId}/recommendations`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.recommendations && data.recommendations.length > 0) {
+        section.style.display = 'block';
+        container.innerHTML = data.recommendations.map(rec => {
+          const edge = rec.graph_edge || {};
+          return `
+            <div class="graph-rec-item" onclick="openDetailModal(${rec.id})">
+              ${rec.image_url ? `
+                <img src="${rec.image_url}" class="graph-rec-thumb" alt="${escapeHtml(rec.title)}" />
+              ` : `
+                <div class="graph-rec-thumb" style="display:flex; align-items:center; justify-content:center; font-size:1.4rem;">
+                  ${rec.type === 'goods' ? '🌾' : '🚜'}
+                </div>
+              `}
+              <div class="graph-rec-info">
+                <div class="graph-rec-reason">🔗 ${escapeHtml(edge.label || 'Связанная потребность')}</div>
+                <div class="graph-rec-title font-slab">${escapeHtml(rec.title)}</div>
+                <div class="graph-rec-bottom">
+                  <span class="graph-rec-price">${rec.price ? `${rec.price} ₽` : 'Договорная'}</span>
+                  <span style="color:var(--text-muted);">📍 ${escapeHtml(rec.location_name)}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+  } catch (err) {
+    console.warn('Ошибка загрузки рекомендаций из графа', err);
+  }
+}
+
 
 function closeDetail() {
   detailModal.style.display = 'none';
